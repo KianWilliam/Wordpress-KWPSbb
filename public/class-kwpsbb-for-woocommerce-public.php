@@ -60,23 +60,56 @@ class Kwpsbb_for_woocommerce_Public {
 	{
 		 if (session_status() == PHP_SESSION_NONE) { session_start(); }
 		
-		if(preg_match('/product_cat/', $_SERVER['REQUEST_URI']))
+		if(preg_match('/product_cat/', $_SERVER['REQUEST_URI'])||preg_match('/product-category/', $_SERVER['REQUEST_URI']))
 		{
+			if(preg_match('/product_cat/', $_SERVER['REQUEST_URI'])){
 			if( isset( $_GET['product_cat'] ) ) 
          			$_SESSION['product_cat'] = 	sanitize_text_field( $_GET['product_cat'] ) ;
+					
 
 
 			if(!empty($_GET['product-page']) ){
-				         		
-
+				         			
 				$_SESSION['product_page'] = intval($_GET['product-page']);
 			}
 			else
 				$_SESSION['product_page'] = 1;
+			}
+			else
+			{
+				$urldata = wp_parse_url($_SERVER['REQUEST_URI']);
+				
+				//preg_match('/product-category\/[A-Za-z0-9]+\//', $urldata['path'], $matches);
+				$fi = strpos($urldata['path'], 'product-category');
+				$val = substr($urldata['path'], $fi+17);
+				if(strpos($val, '/')){
+				$ffi = strpos($val, '/');
+				
+				$val = substr($val, 0, $ffi);
+				}
+					$_SESSION['product_cat'] = 	sanitize_text_field( $val ) ;
+				
+					if(!empty($urldata['query']) && preg_match('/product-page/', $urldata['query'])){
+						$si = strpos($urldata['query'], 'product-page');
+						$val = substr($urldata['query'], $si+13);
+						if(strpos($val, '&')){
+				$si = strpos($val, '&');
+				$val = substr($val, 0, $si);
+						}
+						else
+							$val = substr($val, 0);
+							
+				$_SESSION['product_page'] = intval($val);
+			}
+			else
+				$_SESSION['product_page'] = 1;
+			}
 		}
-		if(preg_match('/product/', $_SERVER['REQUEST_URI']))
+		if(preg_match('/product/', $_SERVER['REQUEST_URI']) || preg_match('/shop/', $_SERVER['REQUEST_URI']))
 		{
-			
+		
+				
+		
 
 			$addscript = "
 			jQuery(document).ready(function(){
@@ -177,3 +210,4 @@ class Kwpsbb_for_woocommerce_Public {
 	}
 
 }
+
